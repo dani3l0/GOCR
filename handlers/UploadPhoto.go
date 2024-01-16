@@ -8,7 +8,8 @@ import (
 	"os"
 )
 
-const uploadDir = "./uploads/"
+var conf = &utils.Config
+var uploadDir = conf.ImageDir
 
 func UploadHandler(w http.ResponseWriter, r *http.Request) {
 	// Create upload directory
@@ -18,8 +19,8 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Parse form
-	err = r.ParseMultipartForm(10 << 20) // 10MB max
+	// Parse form & check size limit
+	err = r.ParseMultipartForm(conf.UploadLimit << 20)
 	if err != nil {
 		http.Error(w, "Bad request", http.StatusBadRequest)
 		return
@@ -44,6 +45,6 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 	if err == nil {
 		fmt.Fprintf(w, "\n%s\n\n", text)
 	} else {
-		fmt.Fprintf(w, "\nFailed getting text content!\n\n")
+		fmt.Fprintf(w, "\nFailed getting text content!\n%s\n\n", err.Error())
 	}
 }
